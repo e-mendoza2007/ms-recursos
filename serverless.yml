@@ -11,67 +11,44 @@ provider:
     TOPIC_RECURSOS_ARN: arn:aws:sns:${aws:region}:${aws:accountId}:tema-recursos
 
 functions:
-  # ---------- Recursos ----------
-  crearRecurso:
-    name: CrearRecurso
-    handler: crear_recurso.lambda_handler
+  recursos:
+    name: Recursos
+    handler: recursos.lambda_handler
     events:
       - http:
           path: /recursos/crear
           method: post
           cors: true
           integration: lambda
-  listarRecursos:
-    name: ListarRecursos
-    handler: listar_recursos.lambda_handler
-    events:
       - http:
           path: /recursos/listar
           method: post
           cors: true
           integration: lambda
-  buscarRecurso:
-    name: BuscarRecurso
-    handler: buscar_recurso.lambda_handler
-    events:
       - http:
           path: /recursos/buscar
           method: post
           cors: true
           integration: lambda
-  modificarRecurso:
-    name: ModificarRecurso
-    handler: modificar_recurso.lambda_handler
-    events:
       - http:
           path: /recursos/modificar
           method: put
           cors: true
           integration: lambda
-  eliminarRecurso:
-    name: EliminarRecurso
-    handler: eliminar_recurso.lambda_handler
-    events:
       - http:
           path: /recursos/eliminar
           method: delete
           cors: true
           integration: lambda
-
-  # ---------- Asignaciones ----------
-  crearAsignacion:
-    name: CrearAsignacion
-    handler: crear_asignacion.lambda_handler
+  asignaciones:
+    name: Asignaciones
+    handler: asignaciones.lambda_handler
     events:
       - http:
           path: /asignaciones/crear
           method: post
           cors: true
           integration: lambda
-  listarAsignaciones:
-    name: ListarAsignaciones
-    handler: listar_asignaciones.lambda_handler
-    events:
       - http:
           path: /asignaciones/listar
           method: post

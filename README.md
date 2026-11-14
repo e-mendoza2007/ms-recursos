@@ -9,20 +9,20 @@ Microservicio de Recursos (personas del equipo) y Asignaciones a proyectos del S
    `cola-presupuestos-asignaciones`).
 2. `serverless deploy`
 
-Crea: 7 Lambdas, tablas `t_recursos` y `t_asignaciones` (GSI por proyecto y por recurso),
+Crea: 2 Lambdas, tablas `t_recursos` y `t_asignaciones` (GSI por proyecto y por recurso),
 tema SNS `tema-recursos` y la suscripcion de `cola-presupuestos-asignaciones` a ese tema.
 
 ## Rutas (todas piden la cabecera `Authorization`)
 
 | Ruta | Lambda | Cuerpo |
 | --- | --- | --- |
-| POST /recursos/crear | CrearRecurso | nombre, costo_hora, rol?, capacidad_semanal? |
-| POST /recursos/listar | ListarRecursos | rol?, limit?, last_key? |
-| POST /recursos/buscar | BuscarRecurso | recurso_id |
-| PUT /recursos/modificar | ModificarRecurso | recurso_id + nombre/rol/costo_hora/capacidad_semanal |
-| DELETE /recursos/eliminar | EliminarRecurso | recurso_id |
-| POST /asignaciones/crear | CrearAsignacion | proyecto_id, recurso_id, horas |
-| POST /asignaciones/listar | ListarAsignaciones | proyecto_id? o recurso_id?, limit?, last_key? |
+| POST /recursos/crear | Recursos (`recursos.py`) | nombre, costo_hora, rol?, capacidad_semanal? |
+| POST /recursos/listar | Recursos (`recursos.py`) | rol?, limit?, last_key? |
+| POST /recursos/buscar | Recursos (`recursos.py`) | recurso_id |
+| PUT /recursos/modificar | Recursos (`recursos.py`) | recurso_id + nombre/rol/costo_hora/capacidad_semanal |
+| DELETE /recursos/eliminar | Recursos (`recursos.py`) | recurso_id |
+| POST /asignaciones/crear | Asignaciones (`asignaciones.py`) | proyecto_id, recurso_id, horas |
+| POST /asignaciones/listar | Asignaciones (`asignaciones.py`) | proyecto_id? o recurso_id?, limit?, last_key? |
 
 ## Reglas
 
@@ -43,3 +43,12 @@ Publica `AsignacionCreada` en `tema-recursos` con `proyecto_id`, `recurso_id`, `
 3. Tener un proyecto con presupuesto (`POST /presupuestos/crear` en ms-presupuestos).
 4. `POST /asignaciones/crear` con `{"proyecto_id": "<id>", "recurso_id": "<id>", "horas": 10}`.
 5. `POST /presupuestos/buscar`: `costo_proyectado` = 500 (unos segundos despues).
+
+## Estructura de Lambdas (2)
+
+Una Lambda atiende varios endpoints: el codigo elige la funcion segun la ruta (`requestPath` de API Gateway).
+
+- `recursos.py` -> Lambda **Recursos**: /recursos/crear, /recursos/listar, /recursos/buscar, /recursos/modificar, /recursos/eliminar
+- `asignaciones.py` -> Lambda **Asignaciones**: /asignaciones/crear, /asignaciones/listar
+
+`comun.py` es codigo compartido (token, respuestas, helpers), no es una Lambda.
