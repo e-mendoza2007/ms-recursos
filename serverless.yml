@@ -54,6 +54,11 @@ functions:
           method: post
           cors: true
           integration: lambda
+      - http:
+          path: /asignaciones/eliminar
+          method: delete
+          cors: true
+          integration: lambda
 
 resources:
   Resources:
@@ -125,3 +130,4 @@ resources:
         FilterPolicy:
           tipo_evento:
             - AsignacionCreada
+            - AsignacionEliminada

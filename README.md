@@ -23,17 +23,19 @@ tema SNS `tema-recursos` y la suscripcion de `cola-presupuestos-asignaciones` a 
 | DELETE /recursos/eliminar | Recursos (`recursos.py`) | recurso_id |
 | POST /asignaciones/crear | Asignaciones (`asignaciones.py`) | proyecto_id, recurso_id, horas |
 | POST /asignaciones/listar | Asignaciones (`asignaciones.py`) | proyecto_id? o recurso_id?, limit?, last_key? |
+| DELETE /asignaciones/eliminar | Asignaciones (`asignaciones.py`) | asignacion_id |
 
 ## Reglas
 
-- `EliminarRecurso` responde 409 si el recurso ya tiene asignaciones.
+- `EliminarRecurso` responde 409 si el recurso ya tiene asignaciones. Para borrarlo, primero se quitan sus asignaciones con `/asignaciones/eliminar`.
 - La asignacion guarda el `costo_hora` del momento y `costo = horas x costo_hora`.
   Si despues cambia el costo_hora del recurso, las asignaciones viejas no cambian.
 - Capacidad semanal: se guarda pero no se valida al asignar (decision pendiente del grupo).
 
 ## Eventos
 
-Publica `AsignacionCreada` en `tema-recursos` con `proyecto_id`, `recurso_id`, `horas` y `costo`.
+Publica `AsignacionCreada` y `AsignacionEliminada` en `tema-recursos` con `proyecto_id`, `recurso_id`, `horas` y `costo`.
+Presupuestos suma el costo al crear y lo descuenta al eliminar.
 `ProcesarAsignaciones` (en ms-presupuestos) lo consume y suma el costo a `costo_proyectado`.
 
 ## Prueba rapida
@@ -49,6 +51,6 @@ Publica `AsignacionCreada` en `tema-recursos` con `proyecto_id`, `recurso_id`, `
 Una Lambda atiende varios endpoints: el codigo elige la funcion segun la ruta (`requestPath` de API Gateway).
 
 - `recursos.py` -> Lambda **Recursos**: /recursos/crear, /recursos/listar, /recursos/buscar, /recursos/modificar, /recursos/eliminar
-- `asignaciones.py` -> Lambda **Asignaciones**: /asignaciones/crear, /asignaciones/listar
+- `asignaciones.py` -> Lambda **Asignaciones**: /asignaciones/crear, /asignaciones/listar, /asignaciones/eliminar
 
 `comun.py` es codigo compartido (token, respuestas, helpers), no es una Lambda.

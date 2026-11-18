@@ -75,9 +75,38 @@ def listar_asignaciones(event, context):
                      last_key=r.get('LastEvaluatedKey'))
 
 
+def eliminar_asignacion(event, context):
+    # Proteger el Lambda
+    sesion = autenticar(event)
+    if not sesion:
+        return NO_AUTORIZADO
+    tenant_id = sesion['tenant_id']
+    # Entrada (json)
+    asignacion_id = (event.get('body') or {}).get('asignacion_id')
+    if not asignacion_id:
+        return respuesta(400, mensaje='Falta asignacion_id')
+    # Proceso: se borra solo si es de este tenant (la clave incluye tenant_id)
+    try:
+        r = dynamodb.Table('t_asignaciones').delete_item(
+            Key={'tenant_id': tenant_id, 'asignacion_id': asignacion_id},
+            ConditionExpression='attribute_exists(tenant_id)',
+            ReturnValues='ALL_OLD'
+        )
+    except dynamodb.meta.client.exceptions.ConditionalCheckFailedException:
+        return respuesta(404, mensaje='La asignacion no existe')
+    vieja = r['Attributes']
+    # Evento para Presupuestos: descuenta el costo de costo_proyectado
+    publicar(os.environ['TOPIC_RECURSOS_ARN'], 'AsignacionEliminada', tenant_id,
+             {'proyecto_id': vieja['proyecto_id'], 'recurso_id': vieja['recurso_id'],
+              'asignacion_id': asignacion_id, 'horas': vieja['horas'], 'costo': vieja['costo']})
+    # Salida (json)
+    return respuesta(200, mensaje='Asignacion eliminada')
+
+
 RUTAS = {
     '/asignaciones/crear': crear_asignacion,
     '/asignaciones/listar': listar_asignaciones,
+    '/asignaciones/eliminar': eliminar_asignacion,
 }
 
 def lambda_handler(event, context):
