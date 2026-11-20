@@ -5,7 +5,7 @@ Microservicio de Recursos (personas del equipo) y Asignaciones a proyectos del S
 ## Despliegue
 
 1. Desplegados antes: `ms-auth`, `ms-proyectos` y `ms-presupuestos`
-   (Recursos invoca `ValidarTokenAcceso` y `BuscarProyecto`, y se suscribe a
+   (Recursos lee `t_tokens_acceso` y `t_proyectos` directo (sin invocar Lambdas), y se suscribe a
    `cola-presupuestos-asignaciones`).
 2. `serverless deploy`
 
